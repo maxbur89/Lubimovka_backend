@@ -1,13 +1,13 @@
-name: develop backend build and deploy
+name: master backend build and  deploy
 
 concurrency:
-  group: develop_deploy
+  group: master_deploy
   cancel-in-progress: true
 
 on:
   push:
     branches:
-      - develop
+      - master
 
 env:
   REGISTRY: ghcr.io
@@ -44,18 +44,18 @@ jobs:
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
 
           # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
+          [ "$VERSION" == "master" ] && VERSION=master
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
 
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:master
+          docker push $IMAGE_ID:master
 
   deploy:
     name: Deploy changes on server
     runs-on: ubuntu-latest
     environment:
-      name: develop_deploy
+      name: master_deploy
     needs: build-and-push-image-to-github-packages
     steps:
       -
@@ -91,6 +91,7 @@ jobs:
             echo "IMAGE_FRONT_TAG=${{ secrets.IMAGE_FRONT_TAG }}" >> .github_vars
             echo "FRONT_BASE_URL=${{ secrets.FRONT_BASE_URL }}" >> .github_vars
             echo "DEVELOP_API_BASE_URL=${{ secrets.DEVELOP_API_BASE_URL }}" >> .github_vars
+            echo "MASTER_API_BASE_URL=${{ secrets.MASTER_API_BASE_URL }}" >> .github_vars
             echo "TEST_API_BASE_URL=${{ secrets.TEST_API_BASE_URL }}" >> .github_vars
             echo "DEV_SUBDOMAIN=${{ secrets.DEV_SUBDOMAIN }}" >> .github_vars
             echo "TEST_SUBDOMAIN=${{ secrets.TEST_SUBDOMAIN }}" >> .github_vars
@@ -123,8 +124,10 @@ jobs:
             echo MAILJET_SECRET_KEY=${{ secrets.MAILJET_SECRET_KEY }} >> .env-dev
 
             # Swag-nginx variables: reading and writing Github secrets in .env-dev
-            echo PUID=$(id -u) >> .env-dev
-            echo PGID=$(id -g) >> .env-dev
+            # echo PUID=$(id -u) >> .env-dev
+            # echo PGID=$(id -g) >> .env-dev
+            echo PUID=${{ secrets.PUID }} >> .env-dev
+            echo PGID=${{ secrets.PGID }} >> .env-dev
             echo URL=${{ secrets.SITE_URL }} >> .env-dev
             echo EMAIL=${{ secrets.SSL_EMAIL }} >> .env-dev
 
@@ -132,42 +135,4 @@ jobs:
             docker pull ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
 
             # re-run docker containers
-            ./docker_check_run.sh backend_develop_deploy.yaml develop
-
-  send_message:
-    name: Send message in telegram group
-    runs-on: ubuntu-latest
-    environment:
-      name: develop_deploy
-    needs: deploy
-    steps:
-      - name: check repository
-        uses: actions/checkout@v1
-      - name: find the PR associated with this push, if there is one
-        uses: jwalton/gh-find-current-pr@v1
-        id: findPr
-        with:
-          state: closed
-      - run: echo "PR=${PR}" >> $GITHUB_ENV
-        if: success() && steps.findPr.outputs.number
-        env:
-          PR: ${{ steps.findPr.outputs.pr }}
-      - name: send message
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_ID }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: |
-                  Код на сервере разработки обновлён!
-
-                  Изменения можно посмотреть в PR:
-                  ${{ secrets.HUB_URL }}/${{ github.repository }}/pull/${{env.PR}}
-
-                  Сайт доступен по адресу:
-                  https://${{ secrets.DEV_SUBDOMAIN }}.${{ secrets.SITE_URL }}
-
-                  Сcылка на документацию в Swagger:
-                  ${{ secrets.DEVELOP_SWAGGER_URL }}
-
-                  Панель администратора:
-                  ${{ secrets.DEVELOP_ADMIN_URL }}
+            ./docker_check_run.sh backend_master_deploy.yaml master
