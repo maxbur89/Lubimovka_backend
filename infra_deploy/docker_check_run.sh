@@ -39,9 +39,9 @@ else
     docker-compose -f swag_deploy.yaml -p lubimovka up -d
   fi
 
-  if [ $project_name = "master" ]
+  if [ $project_name = "prod" ]
   then
-    docker-compose -f swag_master_deploy.yaml -p lubimovka up -d
+    docker-compose -f swag_prod_deploy.yaml -p lubimovka up -d
   fi
 fi
 
@@ -52,10 +52,10 @@ then
     docker-compose -f frontend_deploy.yaml -p frontend up -d
 fi
 
-if [ $project_name = "master" ]
+if [ $project_name = "prod" ]
 then
-    docker-compose -f frontend_master_deploy.yaml -p frontend down
-    docker-compose -f frontend_master_deploy.yaml -p frontend up -d
+    docker-compose -f frontend_prod_deploy.yaml -p frontend down
+    docker-compose -f frontend_prod_deploy.yaml -p frontend up -d
 fi
 
 
@@ -67,7 +67,7 @@ then
     echo "Develop containers run succesfully!"
 fi
 
-if [ $project_name = "master" ]
+if [ $project_name = "prod" ]
 then
     docker-compose -f $compose -p $project_name down
     docker-compose -f $compose -p $project_name up -d

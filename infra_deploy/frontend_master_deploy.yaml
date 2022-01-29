@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  frontend_master:
+  frontend_prod:
     image: "${IMAGE_FRONT}:${IMAGE_FRONT_TAG}"
-    container_name: frontend_master
+    container_name: frontend_prod
     environment:
       BASE_URL: ${FRONT_BASE_URL}
       API_BASE_URL: ${MASTER_API_BASE_URL}

@@ -3,17 +3,17 @@ version: '3.8'
 services:
   postgres:
     image: postgres:13.3
-    container_name: postgres_master
+    container_name: postgres_prod
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
-      - .env-dev
+      - .env-prod
     networks:
-      - master_db_network
+      - prod_db_network
   backend:
     image: "${IMAGE_BACK}:${IMAGE_BACK_TAG}"
-    container_name: backend_master
+    container_name: backend_prod
     restart: always
     volumes:
       - static_value:/code/staticfiles/
@@ -21,13 +21,13 @@ services:
     depends_on:
       - postgres
     env_file:
-      - .env-dev
+      - .env-prod
     networks:
-      - master_db_network
+      - prod_db_network
       - swag_network
   migrations:
     image: "${IMAGE_BACK}:${IMAGE_BACK_TAG}"
-    container_name: migrations_master
+    container_name: migrations_prod
     volumes:
       - static_value:/code/staticfiles/
       - media_value:/code/media/
@@ -37,13 +37,13 @@ services:
     depends_on:
       - backend
     env_file:
-      - .env-dev
+      - .env-prod
     networks:
-      - master_db_network
+      - prod_db_network
 
 networks:
-  master_db_network:
-    name: master_db_network
+  prod_db_network:
+    name: prod_db_network
     driver: bridge
   swag_network:
     name: swag_network

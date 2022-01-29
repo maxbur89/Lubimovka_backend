@@ -13,12 +13,12 @@ services:
       - ONLY_SUBDOMAINS=true
       - CERTPROVIDER=zerossl
     env_file:
-      - .env-dev
+      - .env-prod
     networks:
       - swag_network
     volumes:
       - ./swag_config/:/config/
-      - ./swag/swag_nginx_master.conf:/config/nginx/site-confs/default
+      - ./swag/swag_nginx_prod.conf:/config/nginx/site-confs/default
       - static_value:/config/static/
       - media_value:/config/media/
       - static_value_test:/config/test/static/
