@@ -49,7 +49,7 @@ jobs:
           echo VERSION=$VERSION
 
           docker tag $IMAGE_NAME $IMAGE_ID:master
-#          docker push $IMAGE_ID:master
+          docker push $IMAGE_ID:master
 
   deploy:
     name: Deploy changes on server
