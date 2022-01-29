@@ -1,4 +1,4 @@
-name: master backend build and deploy
+name: master backend build and  deploy
 
 concurrency:
   group: master_deploy
